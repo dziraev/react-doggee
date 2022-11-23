@@ -20,4 +20,5 @@ html {
 *:after,
 *:before {
     box-sizing: border-box;
+    border: none;
 }

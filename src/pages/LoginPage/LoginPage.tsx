@@ -1,44 +1,98 @@
 import { useState } from 'react';
-import { Input } from '@common/fields';
+import { useNavigate } from 'react-router';
+import { Input, PasswordInput, CheckBox } from '@common/fields';
 import { Button } from '@common/buttons';
-import './LoginPage.css';
 
-const LoginPage = () => {
-  const [formValues, setFormValues] = useState({ username: '', password: '' });
+import styles from './LoginPage.module.css';
+
+const validateIsEmpty = (value: string) => {
+  if (!value) return 'field required';
+  return null;
+};
+const validateUsername = (value: string) => {
+  return validateIsEmpty(value);
+};
+const validatePassword = (value: string) => {
+  return validateIsEmpty(value);
+};
+
+const validateLoginFormSchema = {
+  username: validateUsername,
+  password: validatePassword
+};
+
+const validateLoginForm = (name: keyof typeof validateLoginFormSchema, value: string) => {
+  return validateLoginFormSchema[name](value);
+};
+
+interface FormErrors {
+  username: string | null;
+  password: string | null;
+}
+
+export const LoginPage = () => {
+  const navigate = useNavigate();
+  const [formValues, setFormValues] = useState({ username: '', password: '', notMyDevice: false });
+  const [formErrors, setFormErrors] = useState<FormErrors>({
+    username: null,
+    password: null
+  });
 
   return (
-    <div className='login_page'>
-      <div className='login_page_container'>
-        <div>header</div>
-        <div className='login_page_form_container'>
-          <div className='login_page_input_container'>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.header_container}>doggee</div>
+        <div className={styles.form_container}>
+          <div className={styles.input_container}>
             <Input
-              isError
-              helperText='something get wrong'
               value={formValues.username}
-              placeholder='username'
+              label='username'
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setFormValues({ ...formValues, username: event.target.value });
+                const username = event.target.value;
+                setFormValues({ ...formValues, username });
+                const error = validateLoginForm('username', username);
+                setFormErrors({ ...formErrors, username: error });
               }}
+              {...(formErrors.username && {
+                isError: !!formErrors.username,
+                helperText: formErrors.username
+              })}
             />
           </div>
-          <div className='login_page_input_container'>
-            <Input
+          <div className={styles.input_container}>
+            <PasswordInput
               value={formValues.password}
-              placeholder='password'
+              label='password'
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setFormValues({ ...formValues, password: event.target.value });
+                const password = event.target.value;
+                setFormValues({ ...formValues, password });
+                const error = validateLoginForm('username', password);
+                setFormErrors({ ...formErrors, password: error });
+              }}
+              {...(formErrors.password && {
+                isError: !!formErrors.password,
+                helperText: formErrors.password
+              })}
+            />
+          </div>
+          <div className={styles.input_container}>
+            <CheckBox
+              checked={formValues.notMyDevice}
+              label='This is not my device'
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                const notMyDevice = event.target.checked;
+                setFormValues({ ...formValues, notMyDevice });
               }}
             />
           </div>
           <div>
-            <Button> Sign In </Button>
+            <Button isLoading> Sign In </Button>
           </div>
         </div>
-        <div></div>
+        <div className={styles.sign_up_container} onClick={() => navigate('/registration')}>
+          Create a new account
+        </div>
       </div>
     </div>
   );
 };
-
-export default LoginPage;
